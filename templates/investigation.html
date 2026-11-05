@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">Account Investigation Workbench</h4>
+            <p class="text-secondary small mb-0">Multi-factor risk attribution, counterparty ego network, and case notes</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" id="btn-export-csv" onclick="exportAccountCSV()" disabled>
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export Ledger (CSV)
+            </button>
+            <button class="btn btn-sm btn-danger" id="btn-export-pdf" onclick="exportAccountPDF()" disabled>
+                <i class="bi bi-file-earmark-pdf me-1"></i> Download Case Dossier (PDF)
+            </button>
+            <a href="#" id="btn-view-network" class="btn btn-sm btn-primary disabled">
+                <i class="bi bi-diagram-3 me-1"></i> View in Graph
+            </a>
+        </div>
+    </div>
+
+    <!-- Account Search Bar -->
+    <div class="card-dark p-3 mb-4">
+        <form id="accountSearchForm" onsubmit="event.preventDefault(); searchAccount();" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-search"></i></span>
+                    <input type="text" id="account-search-input" class="form-control form-control-dark" placeholder="Enter Account ID (e.g. ACC_0001, ACC_0002)..." value="{{ target_account | default('') }}">
+                    <button class="btn btn-primary" type="submit">Investigate</button>
+                </div>
+            </div>
+            <div class="col-md-7 text-secondary small d-flex align-items-center gap-2">
+                <span>Quick inspect high-risk targets:</span>
+                <button type="button" class="btn btn-xs btn-outline-danger py-0" onclick="quickInspect('ACC_0001')">ACC_0001</button>
+                <button type="button" class="btn btn-xs btn-outline-danger py-0" onclick="quickInspect('ACC_0002')">ACC_0002</button>
+                <button type="button" class="btn btn-xs btn-outline-danger py-0" onclick="quickInspect('ACC_0003')">ACC_0003</button>
+                <button type="button" class="btn btn-xs btn-outline-warning py-0" onclick="quickInspect('ACC_0004')">ACC_0004</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Empty State Prompt -->
+    <div id="investigation-empty-state" class="text-center py-5">
+        <i class="bi bi-shield-lock display-4 text-secondary mb-3"></i>
+        <h5 class="text-white">No Account Selected</h5>
+        <p class="text-secondary small">Search an account ID above or click a target to inspect topological risk.</p>
+    </div>
+
+    <!-- Account Details Container -->
+    <div id="investigation-content" style="display: none;">
+        <!-- KPI Cards Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="card-dark stat-kpi-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="stat-kpi-label">Unified Risk Score</div>
+                        <span id="acc-risk-badge" class="badge-risk-low">Low</span>
+                    </div>
+                    <div class="stat-kpi-value" id="acc-risk-score">0.0</div>
+                    <div class="stat-kpi-sub" id="acc-risk-summary">Combined ML, rule, and graph risk</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card-dark stat-kpi-card">
+                    <div class="stat-kpi-label">Capital Flow Balance</div>
+                    <div class="stat-kpi-value text-white" id="acc-net-flow">$0.00</div>
+                    <div class="stat-kpi-sub" id="acc-flow-sub">Sent: $0.00 &bull; Received: $0.00</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card-dark stat-kpi-card">
+                    <div class="stat-kpi-label">Graph Topology Degree</div>
+                    <div class="stat-kpi-value text-info" id="acc-total-degree">0</div>
+                    <div class="stat-kpi-sub" id="acc-degree-sub">Out: 0 &bull; In: 0 Counterparties</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card-dark stat-kpi-card">
+                    <div class="stat-kpi-label">Laundering Network Status</div>
+                    <div class="stat-kpi-value text-white" id="acc-ring-status">NORMAL</div>
+                    <div class="stat-kpi-sub" id="acc-ring-sub">Cycle: NO &bull; Ring: NO</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <!-- Left: Risk Attribution & Explanations -->
+            <div class="col-lg-6">
+                <div class="card-dark p-3 h-100">
+                    <h6 class="fw-bold text-white mb-3"><i class="bi bi-shield-shaded text-primary me-2"></i>Risk Signal Attribution & Evidence</h6>
+                    <ul class="list-group list-group-flush bg-transparent" id="acc-reasons-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+            </div>
+            <!-- Right: Investigation Notes & Status Update -->
+            <div class="col-lg-6">
+                <div class="card-dark p-3 h-100 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold text-white mb-0"><i class="bi bi-journal-text text-warning me-2"></i>Investigation Case Management</h6>
+                        <span id="case-status-badge" class="badge bg-secondary">NO ACTIVE CASE</span>
+                    </div>
+
+                    <div class="flex-grow-1 overflow-auto mb-3" style="max-height: 180px;" id="case-notes-container">
+                        <div class="text-muted small text-center py-4">No notes logged for this account.</div>
+                    </div>
+
+                    <div class="border-top border-secondary pt-3 mt-auto">
+                        <div class="row g-2 mb-2">
+                            <div class="col-8">
+                                <input type="text" id="note-input" class="form-control form-control-sm form-control-dark" placeholder="Add investigator note...">
+                            </div>
+                            <div class="col-4">
+                                <select id="case-status-select" class="form-select form-select-sm form-select-dark">
+                                    <option value="New">New</option>
+                                    <option value="Under Review">Under Review</option>
+                                    <option value="Escalated">Escalated</option>
+                                    <option value="Closed">Closed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-sm btn-outline-primary" onclick="openNewCaseForAccount()">Open Case</button>
+                            <button class="btn btn-sm btn-primary" onclick="saveNoteAndStatus()">Save Note & Status</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Connected Counterparties Table -->
+        <div class="card-dark">
+            <div class="card-header-dark d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-diagram-2 text-info me-2"></i>Direct Connected Counterparties (Ego Network)</span>
+                <span class="text-secondary small" id="counterparty-count-label">0 Counterparties</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-dark-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th>Counterparty Account</th>
+                            <th>Relationship</th>
+                            <th>Transfer Count</th>
+                            <th>Total Capital Volume</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="counterparties-table-body">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/investigation.js') }}"></script>
+{% endblock %}

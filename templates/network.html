@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="fw-bold mb-1">Financial Network & Fraud Ring Explorer</h4>
+            <p class="text-secondary small mb-0">Interactive topological visualization powered by Cytoscape.js</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="resetGraphView()">
+                <i class="bi bi-arrows-fullscreen me-1"></i> Fit View
+            </button>
+            <button class="btn btn-sm btn-outline-primary" onclick="loadGraphVisualization()">
+                <i class="bi bi-arrow-repeat me-1"></i> Redraw Network
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter Toolbar -->
+    <div class="card-dark p-2 mb-3">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <input type="text" id="graph-account-filter" class="form-control form-control-sm form-control-dark" placeholder="Focus Account (e.g. ACC_0001)...">
+            </div>
+            <div class="col-md-2">
+                <select id="graph-risk-filter" class="form-select form-select-sm form-select-dark">
+                    <option value="">All Risk Tiers</option>
+                    <option value="Critical">Critical Risk Only</option>
+                    <option value="High">High Risk Only</option>
+                    <option value="Medium">Medium Risk Only</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="number" id="graph-min-amount" class="form-control form-control-sm form-control-dark" placeholder="Min Amount ($)" value="1000">
+            </div>
+            <div class="col-md-3 d-flex align-items-center gap-2">
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="graph-suspicious-toggle">
+                    <label class="form-check-label text-secondary small" for="graph-suspicious-toggle">Suspicious Nodes Only</label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-sm btn-primary w-100" onclick="loadGraphVisualization()">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Graph Workspace -->
+    <div class="row g-3">
+        <!-- Cytoscape Canvas Area -->
+        <div class="col-lg-9">
+            <div id="cy-container">
+                <div id="graph-loading" class="loading-overlay" style="display: none;">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+            </div>
+            <!-- Legend Bar -->
+            <div class="card-dark p-2 mt-2 d-flex justify-content-between align-items-center small text-secondary">
+                <div class="d-flex align-items-center gap-3">
+                    <span><b>Nodes:</b></span>
+                    <span><span class="badge bg-danger rounded-circle p-1 me-1"></span> Critical (80+)</span>
+                    <span><span class="badge bg-warning rounded-circle p-1 me-1"></span> High (60+)</span>
+                    <span><span class="badge bg-info rounded-circle p-1 me-1"></span> Medium (30+)</span>
+                    <span><span class="badge bg-success rounded-circle p-1 me-1"></span> Low (0-29)</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span><b>Edges:</b></span>
+                    <span><span style="color: #f59e0b;">&bull;&bull;&bull;&bull;</span> Laundering Cycle Hop</span>
+                    <span><span style="color: #ef4444;">&mdash;&mdash;</span> Flagged Transfer</span>
+                    <span><span style="color: #475569;">&mdash;&mdash;</span> Normal Transfer</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inspector Sidebar -->
+        <div class="col-lg-3">
+            <div class="card-dark p-3" id="inspector-panel" style="min-height: 650px;">
+                <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-2 mb-3">
+                    <h6 class="fw-bold mb-0 text-white">Element Inspector</h6>
+                    <span class="badge bg-secondary" id="inspector-type-badge">NONE</span>
+                </div>
+                <div id="inspector-content">
+                    <div class="text-center py-5 text-muted small">
+                        <i class="bi bi-cursor display-6 mb-2 d-block"></i>
+                        Click any account node or transaction edge on the network to inspect its attributes.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/network.js') }}"></script>
+{% endblock %}

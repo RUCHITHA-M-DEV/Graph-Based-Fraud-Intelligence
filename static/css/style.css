@@ -1,0 +1,257 @@
+/* Graph-Based Fraud Intelligence — Financial Terminal Dark Theme */
+
+:root {
+    --bg-primary: #0a0e17;
+    --bg-secondary: #111827;
+    --bg-tertiary: #1f2937;
+    --bg-card: #151d2c;
+    --border-color: #243042;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent-blue: #3b82f6;
+    --accent-blue-hover: #2563eb;
+    --accent-indigo: #6366f1;
+    --risk-low: #10b981;
+    --risk-medium: #f59e0b;
+    --risk-high: #f97316;
+    --risk-critical: #ef4444;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Sidebar Styling */
+#sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    min-height: 100vh;
+    transition: all 0.3s;
+}
+
+#sidebar .brand-box {
+    padding: 20px 18px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#sidebar .brand-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
+}
+
+#sidebar .brand-subtitle {
+    font-size: 0.72rem;
+    color: var(--accent-blue);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+}
+
+#sidebar .nav-link {
+    color: var(--text-secondary);
+    padding: 11px 18px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 6px;
+    margin: 3px 10px;
+    transition: all 0.2s ease-in-out;
+}
+
+#sidebar .nav-link:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-tertiary);
+}
+
+#sidebar .nav-link.active {
+    color: #ffffff;
+    background-color: var(--accent-blue);
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Main Content Area */
+#content {
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+}
+
+/* Top Navbar */
+.top-navbar {
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 24px;
+}
+
+/* Cards & Surfaces */
+.card-dark {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card-dark:hover {
+    border-color: #334155;
+}
+
+.card-header-dark {
+    background-color: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid var(--border-color);
+    padding: 14px 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* KPI Stat Cards */
+.stat-kpi-card {
+    padding: 18px 20px;
+}
+
+.stat-kpi-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 4px 0;
+}
+
+.stat-kpi-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.stat-kpi-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Risk Badges */
+.badge-risk-critical {
+    background-color: rgba(239, 68, 68, 0.18);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 4px;
+}
+
+.badge-risk-high {
+    background-color: rgba(249, 115, 22, 0.18);
+    color: #fdba74;
+    border: 1px solid rgba(249, 115, 22, 0.4);
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 4px;
+}
+
+.badge-risk-medium {
+    background-color: rgba(245, 158, 11, 0.18);
+    color: #fde047;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 4px;
+}
+
+.badge-risk-low {
+    background-color: rgba(16, 185, 129, 0.18);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 4px;
+}
+
+/* Custom Tables */
+.table-dark-custom {
+    color: var(--text-primary);
+    margin-bottom: 0;
+}
+
+.table-dark-custom thead th {
+    background-color: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 14px;
+}
+
+.table-dark-custom tbody td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 11px 14px;
+    font-size: 0.88rem;
+    vertical-align: middle;
+}
+
+.table-dark-custom tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Form Controls */
+.form-control-dark, .form-select-dark {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 6px;
+}
+
+.form-control-dark:focus, .form-select-dark:focus {
+    background-color: var(--bg-tertiary);
+    border-color: var(--accent-blue);
+    color: #ffffff;
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+}
+
+/* Cytoscape Container */
+#cy-container {
+    width: 100%;
+    height: 650px;
+    background-color: #0c121e;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    position: relative;
+}
+
+/* Modal Dark */
+.modal-content-dark {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.modal-header-dark {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-footer-dark {
+    border-top: 1px solid var(--border-color);
+}
+
+/* Spinner Overlay */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 14, 23, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}

@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">Executive Fraud Intelligence Dashboard</h4>
+            <p class="text-secondary small mb-0">Real-time risk scoring, anomalous transactions, and graph laundering rings</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="loadDashboardData()">
+                <i class="bi bi-arrow-clockwise me-1"></i> Refresh Data
+            </button>
+            <a href="/network" class="btn btn-sm btn-primary">
+                <i class="bi bi-diagram-3 me-1"></i> Open Graph Visualizer
+            </a>
+        </div>
+    </div>
+
+    <!-- KPI Summary Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card-dark stat-kpi-card">
+                <div class="stat-kpi-label">Total Transactions</div>
+                <div class="stat-kpi-value text-white" id="kpi-total-tx">-</div>
+                <div class="stat-kpi-sub" id="kpi-tx-sub">All processed transfers</div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card-dark stat-kpi-card">
+                <div class="stat-kpi-label">Total Volume</div>
+                <div class="stat-kpi-value text-white" id="kpi-total-volume">-</div>
+                <div class="stat-kpi-sub">Gross capital flow</div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card-dark stat-kpi-card">
+                <div class="stat-kpi-label">Suspicious Transfers</div>
+                <div class="stat-kpi-value text-warning" id="kpi-suspicious-tx">-</div>
+                <div class="stat-kpi-sub" id="kpi-rate-sub">Flagged by ML / Rules</div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card-dark stat-kpi-card">
+                <div class="stat-kpi-label">High-Risk Accounts</div>
+                <div class="stat-kpi-value text-danger" id="kpi-high-risk-acc">-</div>
+                <div class="stat-kpi-sub">Score &ge; 60/100</div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card-dark stat-kpi-card">
+                <div class="stat-kpi-label">Fraud Rings</div>
+                <div class="stat-kpi-value text-primary" id="kpi-fraud-rings">-</div>
+                <div class="stat-kpi-sub">Laundering cycles &ge; $1k</div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card-dark stat-kpi-card">
+                <div class="stat-kpi-label">Communities</div>
+                <div class="stat-kpi-value text-info" id="kpi-communities">-</div>
+                <div class="stat-kpi-sub">Louvain clusters</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="row g-3 mb-4">
+        <!-- Daily Transaction Timeline -->
+        <div class="col-lg-8">
+            <div class="card-dark p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0 text-white">Daily Transaction Velocity & Capital Volume</h6>
+                    <span class="badge bg-secondary-subtle text-secondary small">Timeline (30 Days)</span>
+                </div>
+                <div style="height: 280px;">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <!-- Risk Distribution -->
+        <div class="col-lg-4">
+            <div class="card-dark p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0 text-white">Account Risk Distribution</h6>
+                    <span class="badge bg-secondary-subtle text-secondary small">150 Accounts</span>
+                </div>
+                <div style="height: 280px;">
+                    <canvas id="riskDistChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row g-3 mb-4">
+        <!-- Normal vs Suspicious Transactions -->
+        <div class="col-lg-6">
+            <div class="card-dark p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0 text-white">Normal vs Suspicious Transactions</h6>
+                    <span class="badge bg-secondary-subtle text-secondary small">Volume Breakdown</span>
+                </div>
+                <div style="height: 240px;">
+                    <canvas id="suspiciousDonutChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <!-- Detection Method Attribution -->
+        <div class="col-lg-6">
+            <div class="card-dark p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0 text-white">Detection Model Attribution</h6>
+                    <span class="badge bg-secondary-subtle text-secondary small">Triggers by Engine</span>
+                </div>
+                <div style="height: 240px;">
+                    <canvas id="methodBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lower Section: Tables Row -->
+    <div class="row g-3">
+        <!-- Highest-Risk Accounts Queue -->
+        <div class="col-lg-6">
+            <div class="card-dark">
+                <div class="card-header-dark d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-shield-exclamation text-danger me-2"></i>Priority Investigation Queue</span>
+                    <a href="/cases" class="btn btn-sm btn-link text-primary text-decoration-none">View All Cases &rarr;</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark-custom">
+                        <thead>
+                            <tr>
+                                <th>Account</th>
+                                <th>Risk Score</th>
+                                <th>Category</th>
+                                <th>Connections</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top-risk-table-body">
+                            <tr><td colspan="5" class="text-center py-4 text-muted">Loading priority queue...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Suspicious Activity -->
+        <div class="col-lg-6">
+            <div class="card-dark">
+                <div class="card-header-dark d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-activity text-warning me-2"></i>Recent Flagged Transfers</span>
+                    <a href="/transactions?is_suspicious=true" class="btn btn-sm btn-link text-primary text-decoration-none">Explorer &rarr;</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark-custom">
+                        <thead>
+                            <tr>
+                                <th>Tx ID</th>
+                                <th>From &rarr; To</th>
+                                <th>Amount</th>
+                                <th>Timestamp</th>
+                                <th>Alert</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-flagged-table-body">
+                            <tr><td colspan="5" class="text-center py-4 text-muted">Loading flagged transactions...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

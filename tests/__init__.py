@@ -1,0 +1,2 @@
+"""FraudGraph Lite test suite."""
+
